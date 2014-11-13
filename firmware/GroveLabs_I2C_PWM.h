@@ -17,8 +17,8 @@
   Adapted for Spark Core by Paul Kourany, Sept. 15, 2014
  ****************************************************/
 
-#ifndef _ADAFRUIT_PWMServoDriver_H
-#define _ADAFRUIT_PWMServoDriver_H
+#ifndef _GroveLabs_I2C_PWM_H
+#define _GroveLabs_I2C_PWM_H
 
 #if defined (SPARK)
 #include "application.h"
