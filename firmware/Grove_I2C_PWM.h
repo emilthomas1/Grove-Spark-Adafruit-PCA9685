@@ -14,7 +14,7 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.  
   BSD license, all text above must be included in any redistribution
   
-  Adapted for Spark Core by Paul Kourany, Sept. 15, 2014
+  Adapted for Grove Labs by Chad Bean, Nov. 13, 2014
  ****************************************************/
 
 #ifndef _Grove_I2C_PWM_H
@@ -49,9 +49,9 @@
 #define ALLLED_OFF_H 0xFD
 
 
-class Adafruit_PWMServoDriver {
+class Grove_I2C_PWM {
  public:
-  Adafruit_PWMServoDriver(uint8_t addr = 0x40);
+  Grove_I2C_PWM(uint8_t addr = 0x40);
   void begin(void);
   void reset(void);
   void setPWMFreq(float freq);
