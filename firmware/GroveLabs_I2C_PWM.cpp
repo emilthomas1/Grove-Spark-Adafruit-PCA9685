@@ -19,9 +19,9 @@
 #if defined (SPARK)
  #define WIRE Wire
  #include <math.h>
- #include "Adafruit_PWMServoDriver.h"
+ #include "GroveLabs_I2C_PWM.h"
 #else
-#include <Adafruit_PWMServoDriver.h>
+#include <GroveLabs_I2C_PWM.h>
 #include <Wire.h>
 #if defined(__AVR__)
  #define WIRE Wire
