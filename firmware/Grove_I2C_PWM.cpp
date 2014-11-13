@@ -36,21 +36,21 @@
 // Set to true to print some debug messages, or false to disable them.
 #define ENABLE_DEBUG_OUTPUT true
 
-Adafruit_PWMServoDriver::Adafruit_PWMServoDriver(uint8_t addr) {
+Grove_I2C_PWM::Grove_I2C_PWM(uint8_t addr) {
   _i2caddr = addr;
 }
 
-void Adafruit_PWMServoDriver::begin(void) {
+void Grove_I2C_PWM::begin(void) {
  WIRE.begin();
  reset();
 }
 
 
-void Adafruit_PWMServoDriver::reset(void) {
+void Grove_I2C_PWM::reset(void) {
  write8(PCA9685_MODE1, 0x0);
 }
 
-void Adafruit_PWMServoDriver::setPWMFreq(float freq) {
+void Grove_I2C_PWM::setPWMFreq(float freq) {
   //Serial.print("Attempting to set freq ");
   //Serial.println(freq);
   freq *= 0.9;  // Correct for overshoot in the frequency setting (see issue #11).
@@ -77,7 +77,7 @@ void Adafruit_PWMServoDriver::setPWMFreq(float freq) {
   //  Serial.print("Mode now 0x"); Serial.println(read8(PCA9685_MODE1), HEX);
 }
 
-void Adafruit_PWMServoDriver::setPWM(uint8_t num, uint16_t on, uint16_t off) {
+void Grove_I2C_PWM::setPWM(uint8_t num, uint16_t on, uint16_t off) {
   //Serial.print("Setting PWM "); Serial.print(num); Serial.print(": "); Serial.print(on); Serial.print("->"); Serial.println(off);
 
   WIRE.beginTransmission(_i2caddr);
@@ -89,7 +89,7 @@ void Adafruit_PWMServoDriver::setPWM(uint8_t num, uint16_t on, uint16_t off) {
   WIRE.endTransmission();
 }
 
-uint16_t Adafruit_PWMServoDriver::readPWM(uint8_t num) {
+uint16_t Grove_I2C_PWM::readPWM(uint8_t num) {
   int toReturn =  (read8(num*4+LED0_OFF_H)<<8);
   toReturn += read8(num*4+LED0_OFF_L);
   return toReturn
@@ -98,7 +98,7 @@ uint16_t Adafruit_PWMServoDriver::readPWM(uint8_t num) {
 // Sets pin without having to deal with on/off tick placement and properly handles
 // a zero value as completely off.  Optional invert parameter supports inverting
 // the pulse for sinking to ground.  Val should be a value from 0 to 4095 inclusive.
-void Adafruit_PWMServoDriver::setPin(uint8_t num, uint16_t val, bool invert)
+void Grove_I2C_PWM::setPin(uint8_t num, uint16_t val, bool invert)
 {
   // Clamp value between 0 and 4095 inclusive.
   val = min(val, 4095);
@@ -130,7 +130,7 @@ void Adafruit_PWMServoDriver::setPin(uint8_t num, uint16_t val, bool invert)
   }
 }
 
-uint8_t Adafruit_PWMServoDriver::read8(uint8_t addr) {
+uint8_t Grove_I2C_PWM::read8(uint8_t addr) {
   WIRE.beginTransmission(_i2caddr);
   WIRE.write(addr);
   WIRE.endTransmission();
@@ -139,7 +139,7 @@ uint8_t Adafruit_PWMServoDriver::read8(uint8_t addr) {
   return WIRE.read();
 }
 
-void Adafruit_PWMServoDriver::write8(uint8_t addr, uint8_t d) {
+void Grove_I2C_PWM::write8(uint8_t addr, uint8_t d) {
   WIRE.beginTransmission(_i2caddr);
   WIRE.write(addr);
   WIRE.write(d);
