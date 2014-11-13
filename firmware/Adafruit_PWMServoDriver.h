@@ -57,6 +57,7 @@ class Adafruit_PWMServoDriver {
   void setPWMFreq(float freq);
   void setPWM(uint8_t num, uint16_t on, uint16_t off);
   void setPin(uint8_t num, uint16_t val, bool invert=false);
+  void readPWM(uint8_t num);
 
  private:
   uint8_t _i2caddr;
