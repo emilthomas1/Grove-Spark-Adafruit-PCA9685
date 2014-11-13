@@ -89,6 +89,11 @@ void Adafruit_PWMServoDriver::setPWM(uint8_t num, uint16_t on, uint16_t off) {
   WIRE.endTransmission();
 }
 
+void Adafruit_PWMServoDriver::readPWM(uint8_t num) {
+  int toReturn =  (read8(num*4+9)<<8);
+  toReturn += read8(num*4+8);
+  return toReturn
+
 // Sets pin without having to deal with on/off tick placement and properly handles
 // a zero value as completely off.  Optional invert parameter supports inverting
 // the pulse for sinking to ground.  Val should be a value from 0 to 4095 inclusive.
