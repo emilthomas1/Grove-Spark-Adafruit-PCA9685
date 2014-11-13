@@ -93,6 +93,7 @@ uint16_t Adafruit_PWMServoDriver::readPWM(uint8_t num) {
   int toReturn =  (read8(num*4+LED0_OFF_H)<<8);
   toReturn += read8(num*4+LED0_OFF_L);
   return toReturn
+}
 
 // Sets pin without having to deal with on/off tick placement and properly handles
 // a zero value as completely off.  Optional invert parameter supports inverting
