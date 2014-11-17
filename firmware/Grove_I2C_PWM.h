@@ -51,7 +51,7 @@
 
 class Grove_I2C_PWM {
  public:
-  Grove_I2C_PWM(uint8_t addr = 0x40);
+  Grove_I2C_PWM(uint8_t addr = 0x48);
   void begin(void);
   void reset(void);
   void setPWMFreq(float freq);
