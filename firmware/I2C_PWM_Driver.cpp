@@ -15,44 +15,50 @@
   BSD license, all text above must be included in any redistribution
   
   Adapted for Spark Core by Paul Kourany, Sept. 15, 2014
+  Adapted for Grove Labs by Chad Bean, Nov. 13, 2014
+  Adapted for Grove Labs by Louis DeScioli, Dec 12, 2014
  ****************************************************/
-#if defined (SPARK)
- #define WIRE Wire
- #include <math.h>
- #include "Grove_I2C_PWM.h"
-#else
-#include <Grove_I2C_PWM.h>
-#include <Wire.h>
-#if defined(__AVR__)
- #define WIRE Wire
-#elif defined(CORE_TEENSY) // Teensy boards
- #define WIRE Wire
-#else // Arduino Due
- #define WIRE Wire1
-#endif
-#endif //Spark
+
+#include "I2C_PWM_Driver.h"
+#include <math.h>
 
 
 // Set to true to print some debug messages, or false to disable them.
 #define ENABLE_DEBUG_OUTPUT true
 
-Grove_I2C_PWM::Grove_I2C_PWM(uint8_t addr) {
+/**
+ * Initializes the driver with an I2C address. This address must match
+ * the address that is set by the physical jumpers on the driver. If the
+ * address is not being set by hardware, leave no parameters and it will
+ * use the default as specified in the header file
+ */
+I2C_PWM_Driver::I2C_PWM_Driver(uint8_t addr) {
   _i2caddr = addr;
 }
 
-void Grove_I2C_PWM::begin(void) {
- WIRE.begin();
+/**
+ * [I2C_PWM_Driver::begin description]
+ */
+void I2C_PWM_Driver::begin(void) {
+ Wire.begin();
  reset();
 }
 
-
-void Grove_I2C_PWM::reset(void) {
+/**
+ * [I2C_PWM_Driver::reset description]
+ */
+void I2C_PWM_Driver::reset(void) {
  write8(PCA9685_MODE1, 0x0);
 }
 
-void Grove_I2C_PWM::setPWMFreq(float freq) {
-  //Serial.print("Attempting to set freq ");
-  //Serial.println(freq);
+/**
+ * [I2C_PWM_Driver::setPWMFreq description]
+ * @param freq [description]
+ */
+void I2C_PWM_Driver::setPWMFreq(float freq) {
+  if (ENABLE_DEBUG_OUTPUT) {
+    Serial.print("Attempting to set freq "); Serial.println(freq);
+  }
   freq *= 0.9;  // Correct for overshoot in the frequency setting (see issue #11).
   float prescaleval = 25000000;
   prescaleval /= 4096;
@@ -77,31 +83,50 @@ void Grove_I2C_PWM::setPWMFreq(float freq) {
   //  Serial.print("Mode now 0x"); Serial.println(read8(PCA9685_MODE1), HEX);
 }
 
-void Grove_I2C_PWM::setPWM(uint8_t num, uint16_t on, uint16_t off) {
-  //Serial.print("Setting PWM "); Serial.print(num); Serial.print(": "); Serial.print(on); Serial.print("->"); Serial.println(off);
+/**
+ * [I2C_PWM_Driver::setPWM description]
+ * @param num [description]
+ * @param on  [description]
+ * @param off [description]
+ */
+void I2C_PWM_Driver::setPWM(uint8_t num, uint16_t on, uint16_t off) {
+  if (ENABLE_DEBUG_OUTPUT) {
+   Serial.print("Setting PWM "); Serial.print(num); Serial.print(": "); Serial.print(on); Serial.print("->"); Serial.println(off);
+  }
 
-  WIRE.beginTransmission(_i2caddr);
-  WIRE.write(LED0_ON_L+4*num);
-  WIRE.write(on);
-  WIRE.write(on>>8);
-  WIRE.write(off);
-  WIRE.write(off>>8);
-  WIRE.endTransmission();
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(LED0_ON_L+4*num);
+  Wire.write(on);
+  Wire.write(on>>8);
+  Wire.write(off);
+  Wire.write(off>>8);
+  Wire.endTransmission();
 }
 
-uint16_t Grove_I2C_PWM::readPWM(uint8_t num) {
+/**
+ * [I2C_PWM_Driver::readPWM description]
+ * @param  num [description]
+ * @return     [description]
+ */
+uint16_t I2C_PWM_Driver::readPWM(uint8_t num) {
   int toReturn =  (read8(num*4+LED0_OFF_H)<<8);
   toReturn += read8(num*4+LED0_OFF_L);
   return toReturn;
 }
 
-// Sets pin without having to deal with on/off tick placement and properly handles
-// a zero value as completely off.  Optional invert parameter supports inverting
-// the pulse for sinking to ground.  Val should be a value from 0 to 4095 inclusive.
-void Grove_I2C_PWM::setPin(uint8_t num, uint16_t val, bool invert)
+/**
+ * Sets pin without having to deal with on/off tick placement and properly handles
+ * a zero value as completely off.  Optional invert parameter supports inverting
+ * the pulse for sinking to ground.  
+ * @param num    [description]
+ * @param val    Should be from 0 to 4095 inclusive, will be clamped if not within range
+ * @param invert [description]
+ */
+void I2C_PWM_Driver::setPin(uint8_t num, uint16_t val, bool invert)
 {
   // Clamp value between 0 and 4095 inclusive.
   val = min(val, 4095);
+  val = max(0, val);
   if (invert) {
     if (val == 0) {
       // Special value for signal fully on.
@@ -130,18 +155,28 @@ void Grove_I2C_PWM::setPin(uint8_t num, uint16_t val, bool invert)
   }
 }
 
-uint8_t Grove_I2C_PWM::read8(uint8_t addr) {
-  WIRE.beginTransmission(_i2caddr);
-  WIRE.write(addr);
-  WIRE.endTransmission();
+/**
+ * [I2C_PWM_Driver::read8 description]
+ * @param  addr [description]
+ * @return      [description]
+ */
+uint8_t I2C_PWM_Driver::read8(uint8_t addr) {
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(addr);
+  Wire.endTransmission();
 
-  WIRE.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
-  return WIRE.read();
+  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
+  return Wire.read();
 }
 
-void Grove_I2C_PWM::write8(uint8_t addr, uint8_t d) {
-  WIRE.beginTransmission(_i2caddr);
-  WIRE.write(addr);
-  WIRE.write(d);
-  WIRE.endTransmission();
+/**
+ * [I2C_PWM_Driver::write8 description]
+ * @param addr [description]
+ * @param d    [description]
+ */
+void I2C_PWM_Driver::write8(uint8_t addr, uint8_t d) {
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(addr);
+  Wire.write(d);
+  Wire.endTransmission();
 }

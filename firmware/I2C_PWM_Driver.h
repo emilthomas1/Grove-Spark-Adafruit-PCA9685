@@ -14,21 +14,15 @@
   Written by Limor Fried/Ladyada for Adafruit Industries.  
   BSD license, all text above must be included in any redistribution
   
+  Adapted for Spark Core by Paul Kourany, Sept. 15, 2014
   Adapted for Grove Labs by Chad Bean, Nov. 13, 2014
+  Adapted for Grove Labs by Louis DeScioli, Dec 12, 2014
  ****************************************************/
 
-#ifndef _Grove_I2C_PWM_H
-#define _Grove_I2C_PWM_H
+#ifndef _I2C_PWM_Driver_H
+#define _I2C_PWM_Driver_H
 
-#if defined (SPARK)
 #include "application.h"
-#else
-#if ARDUINO >= 100
- #include "Arduino.h"
-#else
- #include "WProgram.h"
-#endif
-#endif //Spark
 
 
 #define PCA9685_SUBADR1 0x2
@@ -49,9 +43,9 @@
 #define ALLLED_OFF_H 0xFD
 
 
-class Grove_I2C_PWM {
+class I2C_PWM_Driver {
  public:
-  Grove_I2C_PWM(uint8_t addr = 0x48);
+  I2C_PWM_Driver(uint8_t addr = 0x40);
   void begin(void);
   void reset(void);
   void setPWMFreq(float freq);

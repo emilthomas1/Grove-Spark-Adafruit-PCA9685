@@ -1,34 +1,28 @@
-Adafruit 16-channel PWM & Servo driver
-======================================
-This library is for the Adafruit 16-channel PWM & Servo board.
+== Adafruit 16-channel PWM & Servo driver
 
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/products/815
+This library is for the [Adafruit 16-channel PWM & Servo board](http://www.adafruit.com/products/815) when being used with a Spark Core, and only Spark Core (sorry Arduino)
 
-The library is compatible with Arduino and Spark Core.
 
-Connections
------------
+=== Connections
+
 These displays use I2C to communicate, 2 pins are required to interface:
 
-For Arduinos:	 SCL -> Analog 5, SDA -> Analog 4
+    SCL -> D1
+    SDA -> D0
 
-For Spark Core:	 SCL -> D1, SDA -> D0
+=== Things to Note
 
-Credits
--------
+=== Default I2C Slave Address 
+With no address jumpers, the default I2C slave address of the board is `100 0000` or `0x40`. This default is set in the header file. If you are altering the address with jumpers, make sure to set it in the software to match.
+
+==== Turning off the LEDs
+If you want to turn the LEDs totally off use `setPWM(pin, 4096, 0);` not `setPWM(pin, 4095, 0);`
+
+=== Credits
 Adafruit invests time and resources providing this open source code, 
 please support Adafruit and open-source hardware by purchasing 
 products from Adafruit!
 
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
-BSD license, check license.txt for more information
+Written by Limor Fried (Ladyada) for Adafruit Industries.  
+BSD license, check LICENSE for more information
 All text above must be included in any redistribution
-
-Adapted for Spark Core by Paul Kourany, Sept. 15, 2014
-
-Loading on Arduino (only)
--------------------------
-To download. click the DOWNLOADS button in the top right corner, rename the uncompressed folder Adafruit_PWMServoDriver. Check that the Adafruit_PWMServoDriver folder contains Adafruit_PWMServoDriver.cpp and Adafruit_PWMServoDriver.h
-
-Place the Adafruit_PWMServoDriver library folder your <arduinosketchfolder>/libraries/ folder. You may need to create the libraries subfolder if its your first library. Restart the IDE.
