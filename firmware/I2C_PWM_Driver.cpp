@@ -22,22 +22,19 @@
 #include "I2C_PWM_Driver.h"
 #include <math.h>
 
-
-// Set to true to print some debug messages, or false to disable them.
-#define ENABLE_DEBUG_OUTPUT true
-
 /**
  * Initializes the driver with an I2C address. This address must match
  * the address that is set by the physical jumpers on the driver. If the
- * address is not being set by hardware, leave no parameters and it will
- * use the default as specified in the header file
+ * address is not being set by hardware, give no parameters and it will
+ * use the default as specified in the header file (0x40)
  */
-I2C_PWM_Driver::I2C_PWM_Driver(uint8_t addr) {
+I2C_PWM_Driver::I2C_PWM_Driver(uint8_t addr, bool debug) {
   _i2caddr = addr;
+  _debug = debug;
 }
 
 /**
- * [I2C_PWM_Driver::begin description]
+ * Join the I2C bus as a master and setup the driver's mode
  */
 void I2C_PWM_Driver::begin(void) {
  Wire.begin();
@@ -45,18 +42,18 @@ void I2C_PWM_Driver::begin(void) {
 }
 
 /**
- * [I2C_PWM_Driver::reset description]
+ * Setup the driver's modes
  */
 void I2C_PWM_Driver::reset(void) {
- write8(PCA9685_MODE1, 0x0);
+ write8(MODE1, 0x0);  // See page 13 of datasheet
 }
 
 /**
- * [I2C_PWM_Driver::setPWMFreq description]
- * @param freq [description]
+ * Set the output frequency of the board
+ * @param freq  The frequency
  */
 void I2C_PWM_Driver::setPWMFreq(float freq) {
-  if (ENABLE_DEBUG_OUTPUT) {
+  if ( _debug ) {
     Serial.print("Attempting to set freq "); Serial.println(freq);
   }
   freq *= 0.9;  // Correct for overshoot in the frequency setting (see issue #11).
@@ -64,65 +61,34 @@ void I2C_PWM_Driver::setPWMFreq(float freq) {
   prescaleval /= 4096;
   prescaleval /= freq;
   prescaleval -= 1;
-  if (ENABLE_DEBUG_OUTPUT) {
+  if ( _debug ) {
     Serial.print("Estimated pre-scale: "); Serial.println(prescaleval);
   }
   uint8_t prescale = floor(prescaleval + 0.5);
-  if (ENABLE_DEBUG_OUTPUT) {
+  if ( _debug ) {
     Serial.print("Final pre-scale: "); Serial.println(prescale);
   }
   
-  uint8_t oldmode = read8(PCA9685_MODE1);
-  uint8_t newmode = (oldmode&0x7F) | 0x10; // sleep
-  write8(PCA9685_MODE1, newmode); // go to sleep
-  write8(PCA9685_PRESCALE, prescale); // set the prescaler
-  write8(PCA9685_MODE1, oldmode);
+  uint8_t oldmode = read8(MODE1);
+  uint8_t newmode = (oldmode & 0x7F) | 0x10; // sleep
+  write8(MODE1, newmode); // go to sleep
+  write8(PRESCALE, prescale); // set the prescaler
+  write8(MODE1, oldmode);
   delay(5);
-  write8(PCA9685_MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
+  write8(MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
                                           // This is why the beginTransmission below was not working.
-  //  Serial.print("Mode now 0x"); Serial.println(read8(PCA9685_MODE1), HEX);
+  //  Serial.print("Mode now 0x"); Serial.println(read8(MODE1), HEX);
 }
 
 /**
- * [I2C_PWM_Driver::setPWM description]
- * @param num [description]
- * @param on  [description]
- * @param off [description]
- */
-void I2C_PWM_Driver::setPWM(uint8_t num, uint16_t on, uint16_t off) {
-  if (ENABLE_DEBUG_OUTPUT) {
-   Serial.print("Setting PWM "); Serial.print(num); Serial.print(": "); Serial.print(on); Serial.print("->"); Serial.println(off);
-  }
-
-  Wire.beginTransmission(_i2caddr);
-  Wire.write(LED0_ON_L+4*num);
-  Wire.write(on);
-  Wire.write(on>>8);
-  Wire.write(off);
-  Wire.write(off>>8);
-  Wire.endTransmission();
-}
-
-/**
- * [I2C_PWM_Driver::readPWM description]
- * @param  num [description]
- * @return     [description]
- */
-uint16_t I2C_PWM_Driver::readPWM(uint8_t num) {
-  int toReturn =  (read8(num*4+LED0_OFF_H)<<8);
-  toReturn += read8(num*4+LED0_OFF_L);
-  return toReturn;
-}
-
-/**
- * Sets pin without having to deal with on/off tick placement and properly handles
+ * Sets the value of an LED without having to deal with on/off tick placement. Also properly handles
  * a zero value as completely off.  Optional invert parameter supports inverting
- * the pulse for sinking to ground.  
- * @param num    [description]
- * @param val    Should be from 0 to 4095 inclusive, will be clamped if not within range
- * @param invert [description]
+ * the pulse for sinking to ground.
+ * @param ledNum  The LED number on the driver board (0 -> 15)
+ * @param val     The duty cycle value. Should be from 0 to 4095 inclusive, will be clamped if not within range
+ * @param invert  Whether or not to invert the pulse for sinking to ground
  */
-void I2C_PWM_Driver::setPin(uint8_t num, uint16_t val, bool invert)
+void I2C_PWM_Driver::setVal(uint8_t ledNum, uint16_t val, bool invert)
 {
   // Clamp value between 0 and 4095 inclusive.
   val = min(val, 4095);
@@ -130,53 +96,95 @@ void I2C_PWM_Driver::setPin(uint8_t num, uint16_t val, bool invert)
   if (invert) {
     if (val == 0) {
       // Special value for signal fully on.
-      setPWM(num, 4096, 0);
+      setPWM(ledNum, 4096, 0);
     }
     else if (val == 4095) {
       // Special value for signal fully off.
-      setPWM(num, 0, 4096);
+      setPWM(ledNum, 0, 4096);
     }
     else {
-      setPWM(num, 0, 4095-val);
+      setPWM(ledNum, 0, 4095-val);
     }
   }
   else {
     if (val == 4095) {
       // Special value for signal fully on.
-      setPWM(num, 4096, 0);
+      setPWM(ledNum, 4096, 0);
     }
     else if (val == 0) {
       // Special value for signal fully off.
-      setPWM(num, 0, 4096);
+      setPWM(ledNum, 0, 4096);
     }
     else {
-      setPWM(num, 0, val);
+      setPWM(ledNum, 0, val);
     }
   }
 }
 
 /**
- * [I2C_PWM_Driver::read8 description]
- * @param  addr [description]
- * @return      [description]
+ * Read the set PWM-off value for a given LED
+ * @param  ledNum  The LED number on the driver
+ * @return         The 12-bit PWM-off value, given in 2 bytes
+ */
+uint16_t I2C_PWM_Driver::readPWMOff(uint8_t ledNum) {
+  int toReturn =  (read8(LED0_OFF_H + 4*ledNum) << 8);  // Read the first byte and shift it
+  toReturn += read8(LED0_OFF_L + 4*ledNum);             // Read the second byte
+  return toReturn;
+}
+
+/**
+ * Read the set PWM-on value for a given LED
+ * @param  ledNum  The LED number on the driver
+ * @return         The 12-bit PWM-on value, given in 2 bytes
+ */
+uint16_t I2C_PWM_Driver::readPWMOn(uint8_t ledNum) {
+  int result = (read8(LED0_ON_H + 4*ledNum) << 8);
+  result += read8(LED0_ON_L + 4*ledNum);
+  return result;
+}
+
+/**
+ * Explicitly set the duty cycle for an LED. setVal() provides some abstractions atop this method 
+ * and is recommended over this function
+ * @param ledNum  The LED number on the driver board (0 -> 15)
+ * @param on      12-bit PWM-on value
+ * @param off     12-bit PWM-off value
+ */
+void I2C_PWM_Driver::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
+  if (_debug) {
+   Serial.print("Setting PWM for LED "); Serial.print(ledNum); Serial.print(" to "); Serial.print(on); Serial.print(" -> "); Serial.println(off);
+  }
+
+  Wire.beginTransmission(_i2caddr);
+  Wire.write(LED0_ON_L + 4*ledNum);  // Offset the address of the LED
+  Wire.write(on);                    // Write the first byte for On
+  Wire.write(on >> 8);               // Write the second byte
+  Wire.write(off);                   // First byte for Off
+  Wire.write(off >> 8);              // Second byte for Off
+  Wire.endTransmission();
+}
+
+/**
+ * Read a byte from a given address on the driver
+ * @param  addr  The address
+ * @return       The value at the given address
  */
 uint8_t I2C_PWM_Driver::read8(uint8_t addr) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(addr);
   Wire.endTransmission();
-
   Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
   return Wire.read();
 }
 
 /**
- * [I2C_PWM_Driver::write8 description]
- * @param addr [description]
- * @param d    [description]
+ * Write a byte to a given address on the driver
+ * @param addr  The address
+ * @param val   The byte to be written
  */
-void I2C_PWM_Driver::write8(uint8_t addr, uint8_t d) {
+void I2C_PWM_Driver::write8(uint8_t addr, uint8_t val) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(addr);
-  Wire.write(d);
+  Wire.write(val);
   Wire.endTransmission();
 }
