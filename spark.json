@@ -1,7 +1,7 @@
 {
 	"name": "I2C_PWM_Driver",
 	"author": "Limor Fried/Paul Kourany/Chad Bean/Louis DeScioli",
-	"version": "1.0.6",
+	"version": "2.0.0",
 	"license": "BSD License",
 	"description": "Adafruit 16-channel PWM & Servo driver library adapted for Spark"
 }
