@@ -152,7 +152,8 @@ uint16_t I2C_PWM_Driver::readPWMOn(uint8_t ledNum) {
  */
 void I2C_PWM_Driver::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
   if (_debug) {
-   Serial.print("Setting PWM for LED "); Serial.print(ledNum); Serial.print(" to "); Serial.print(on); Serial.print(" -> "); Serial.println(off);
+   Serial.print("Setting PWM for LED "); Serial.print(ledNum); Serial.print(" to ");
+   Serial.print(on); Serial.print(" -> "); Serial.println(off);
   }
 
   Wire.beginTransmission(_i2caddr);
