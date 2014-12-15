@@ -75,17 +75,16 @@ void I2C_PWM_Driver::setPWMFreq(float freq) {
   write8(PRESCALE, prescale); // set the prescaler
   write8(MODE1, oldmode);
   delay(5);
-  write8(MODE1, oldmode | 0xa1);  //  This sets the MODE1 register to turn on auto increment.
-                                          // This is why the beginTransmission below was not working.
-  //  Serial.print("Mode now 0x"); Serial.println(read8(MODE1), HEX);
+  write8(MODE1, oldmode | 0xa1);  // Turns on auto increment in MODE1 register
 }
 
 /**
- * Sets the value of an LED without having to deal with on/off tick placement. Also properly handles
- * a zero value as completely off.  Optional invert parameter supports inverting
- * the pulse for sinking to ground.
+ * Sets the value of an LED without having to deal with on/off tick placement.
+ * Also properly handles a zero value as completely off.  Optional invert 
+ * parameter supports inverting the pulse for sinking to ground.
  * @param ledNum  The LED number on the driver board (0 -> 15)
- * @param val     The duty cycle value. Should be from 0 to 4095 inclusive, will be clamped if not within range
+ * @param val     The duty cycle value. Should be from 0 to 4095 inclusive, 
+ *                will be clamped if not within range
  * @param invert  Whether or not to invert the pulse for sinking to ground
  */
 void I2C_PWM_Driver::setVal(uint8_t ledNum, uint16_t val, bool invert)
@@ -127,7 +126,7 @@ void I2C_PWM_Driver::setVal(uint8_t ledNum, uint16_t val, bool invert)
  * @return         The 12-bit PWM-off value, given in 2 bytes
  */
 uint16_t I2C_PWM_Driver::readPWMOff(uint8_t ledNum) {
-  int toReturn =  (read8(LED0_OFF_H + 4*ledNum) << 8);  // Read the first byte and shift it
+  int toReturn =  (read8(LED0_OFF_H + 4*ledNum) << 8);  // Read first byte and shift it
   toReturn += read8(LED0_OFF_L + 4*ledNum);             // Read the second byte
   return toReturn;
 }
