@@ -19,8 +19,8 @@
   Adapted for Grove Labs by Louis DeScioli, Dec 12, 2014
  ****************************************************/
 
-#ifndef _I2C_PWM_Driver_H
-#define _I2C_PWM_Driver_H
+#ifndef _Adafruit_PCA9685_H
+#define _Adafruit_PCA9685_H
 
 #include "application.h"
 
@@ -41,9 +41,9 @@
 #define PRESCALE 0xFE
 
 
-class I2C_PWM_Driver {
+class Adafruit_PCA9685 {
  public:
-  I2C_PWM_Driver(uint8_t addr = 0x40, bool debug = false);
+  Adafruit_PCA9685(uint8_t addr = 0x40, bool debug = false);
   void begin(void);
   void reset(void);
   void setPWMFreq(float freq);

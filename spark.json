@@ -1,7 +1,7 @@
 {
-	"name": "I2C_PWM_Driver",
+	"name": "Adafruit_PCA9685",
 	"author": "Limor Fried/Paul Kourany/Chad Bean/Louis DeScioli",
 	"version": "2.0.0",
 	"license": "BSD License",
-	"description": "Adafruit 16-channel PWM & Servo driver library adapted for Spark"
+	"description": "Library for Adafruit's PCA9685, a 16-channel PWM & Servo driver,  adapted for Spark"
 }

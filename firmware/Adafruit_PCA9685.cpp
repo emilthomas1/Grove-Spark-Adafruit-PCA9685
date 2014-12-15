@@ -19,7 +19,7 @@
   Adapted for Grove Labs by Louis DeScioli, Dec 12, 2014
  ****************************************************/
 
-#include "I2C_PWM_Driver.h"
+#include "Adafruit_PCA9685.h"
 #include <math.h>
 
 /**
@@ -28,7 +28,7 @@
  * address is not being set by hardware, give no parameters and it will
  * use the default as specified in the header file (0x40)
  */
-I2C_PWM_Driver::I2C_PWM_Driver(uint8_t addr, bool debug) {
+Adafruit_PCA9685::Adafruit_PCA9685(uint8_t addr, bool debug) {
   _i2caddr = addr;
   _debug = debug;
 }
@@ -36,7 +36,7 @@ I2C_PWM_Driver::I2C_PWM_Driver(uint8_t addr, bool debug) {
 /**
  * Join the I2C bus as a master and setup the driver's mode
  */
-void I2C_PWM_Driver::begin(void) {
+void Adafruit_PCA9685::begin(void) {
  Wire.begin();
  reset();
 }
@@ -44,7 +44,7 @@ void I2C_PWM_Driver::begin(void) {
 /**
  * Setup the driver's modes
  */
-void I2C_PWM_Driver::reset(void) {
+void Adafruit_PCA9685::reset(void) {
  write8(MODE1, 0x0);  // See page 13 of datasheet
 }
 
@@ -52,7 +52,7 @@ void I2C_PWM_Driver::reset(void) {
  * Set the output frequency of the board
  * @param freq  The frequency
  */
-void I2C_PWM_Driver::setPWMFreq(float freq) {
+void Adafruit_PCA9685::setPWMFreq(float freq) {
   if ( _debug ) {
     Serial.print("Attempting to set freq "); Serial.println(freq);
   }
@@ -87,7 +87,7 @@ void I2C_PWM_Driver::setPWMFreq(float freq) {
  *                will be clamped if not within range
  * @param invert  Whether or not to invert the pulse for sinking to ground
  */
-void I2C_PWM_Driver::setVal(uint8_t ledNum, uint16_t val, bool invert)
+void Adafruit_PCA9685::setVal(uint8_t ledNum, uint16_t val, bool invert)
 {
   // Clamp value between 0 and 4095 inclusive.
   val = min(val, 4095);
@@ -125,7 +125,7 @@ void I2C_PWM_Driver::setVal(uint8_t ledNum, uint16_t val, bool invert)
  * @param  ledNum  The LED number on the driver
  * @return         The 12-bit PWM-off value, given in 2 bytes
  */
-uint16_t I2C_PWM_Driver::readPWMOff(uint8_t ledNum) {
+uint16_t Adafruit_PCA9685::readPWMOff(uint8_t ledNum) {
   int toReturn =  (read8(LED0_OFF_H + 4*ledNum) << 8);  // Read first byte and shift it
   toReturn += read8(LED0_OFF_L + 4*ledNum);             // Read the second byte
   return toReturn;
@@ -136,7 +136,7 @@ uint16_t I2C_PWM_Driver::readPWMOff(uint8_t ledNum) {
  * @param  ledNum  The LED number on the driver
  * @return         The 12-bit PWM-on value, given in 2 bytes
  */
-uint16_t I2C_PWM_Driver::readPWMOn(uint8_t ledNum) {
+uint16_t Adafruit_PCA9685::readPWMOn(uint8_t ledNum) {
   int result = (read8(LED0_ON_H + 4*ledNum) << 8);
   result += read8(LED0_ON_L + 4*ledNum);
   return result;
@@ -149,7 +149,7 @@ uint16_t I2C_PWM_Driver::readPWMOn(uint8_t ledNum) {
  * @param on      12-bit PWM-on value
  * @param off     12-bit PWM-off value
  */
-void I2C_PWM_Driver::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
+void Adafruit_PCA9685::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
   if (_debug) {
    Serial.print("Setting PWM for LED "); Serial.print(ledNum); Serial.print(" to ");
    Serial.print(on); Serial.print(" -> "); Serial.println(off);
@@ -169,7 +169,7 @@ void I2C_PWM_Driver::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
  * @param  addr  The address
  * @return       The value at the given address
  */
-uint8_t I2C_PWM_Driver::read8(uint8_t addr) {
+uint8_t Adafruit_PCA9685::read8(uint8_t addr) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(addr);
   Wire.endTransmission();
@@ -182,7 +182,7 @@ uint8_t I2C_PWM_Driver::read8(uint8_t addr) {
  * @param addr  The address
  * @param val   The byte to be written
  */
-void I2C_PWM_Driver::write8(uint8_t addr, uint8_t val) {
+void Adafruit_PCA9685::write8(uint8_t addr, uint8_t val) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(addr);
   Wire.write(val);
