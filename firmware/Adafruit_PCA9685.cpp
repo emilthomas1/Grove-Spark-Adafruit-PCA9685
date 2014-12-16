@@ -7,7 +7,7 @@
   These displays use I2C to communicate, 2 pins are required to  
   interface. For Arduino UNOs, thats SCL -> Analog 5, SDA -> Analog 4
 
-  Adafruit invests time and resources providing this open source code, 
+  Adafruit invests time and resources providing this open source code, ¡
   please support Adafruit and open-source hardware by purchasing 
   products from Adafruit!
 
@@ -45,7 +45,7 @@ void Adafruit_PCA9685::begin(void) {
  * Setup the driver's modes
  */
 void Adafruit_PCA9685::reset(void) {
- write8(MODE1, 0x0);  // See page 13 of datasheet
+ write8(PCA9685_MODE1, 0x0);  // See page 13 of datasheet
 }
 
 /**
@@ -69,13 +69,13 @@ void Adafruit_PCA9685::setPWMFreq(float freq) {
     Serial.print("Final pre-scale: "); Serial.println(prescale);
   }
   
-  uint8_t oldmode = read8(MODE1);
+  uint8_t oldmode = read8(PCA9685_MODE1);
   uint8_t newmode = (oldmode & 0x7F) | 0x10; // sleep
-  write8(MODE1, newmode); // go to sleep
-  write8(PRESCALE, prescale); // set the prescaler
-  write8(MODE1, oldmode);
+  write8(PCA9685_MODE1, newmode); // go to sleep
+  write8(PCA9685_PRESCALE, prescale); // set the prescaler
+  write8(PCA9685_MODE1, oldmode);
   delay(5);
-  write8(MODE1, oldmode | 0xa1);  // Turns on auto increment in MODE1 register
+  write8(PCA9685_MODE1, oldmode | 0xa1);  // Turns on auto increment in MODE1 register
 }
 
 /**
@@ -126,8 +126,8 @@ void Adafruit_PCA9685::setVal(uint8_t ledNum, uint16_t val, bool invert)
  * @return         The 12-bit PWM-off value, given in 2 bytes
  */
 uint16_t Adafruit_PCA9685::readPWMOff(uint8_t ledNum) {
-  int toReturn =  (read8(LED0_OFF_H + 4*ledNum) << 8);  // Read first byte and shift it
-  toReturn += read8(LED0_OFF_L + 4*ledNum);             // Read the second byte
+  int toReturn =  (read8(PCA9685_LED0_OFF_H + 4*ledNum) << 8);  // Read first byte and shift it
+  toReturn += read8(PCA9685_LED0_OFF_L + 4*ledNum);             // Read the second byte
   return toReturn;
 }
 
@@ -137,8 +137,8 @@ uint16_t Adafruit_PCA9685::readPWMOff(uint8_t ledNum) {
  * @return         The 12-bit PWM-on value, given in 2 bytes
  */
 uint16_t Adafruit_PCA9685::readPWMOn(uint8_t ledNum) {
-  int result = (read8(LED0_ON_H + 4*ledNum) << 8);
-  result += read8(LED0_ON_L + 4*ledNum);
+  int result = (read8(PCA9685_LED0_ON_H + 4*ledNum) << 8);
+  result += read8(PCA9685_LED0_ON_L + 4*ledNum);
   return result;
 }
 
@@ -156,7 +156,7 @@ void Adafruit_PCA9685::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
   }
 
   Wire.beginTransmission(_i2caddr);
-  Wire.write(LED0_ON_L + 4*ledNum);  // Offset the address of the LED
+  Wire.write(PCA9685_LED0_ON_L + 4*ledNum);  // Offset the address of the LED
   Wire.write(on);                    // Write the first byte for On
   Wire.write(on >> 8);               // Write the second byte
   Wire.write(off);                   // First byte for Off
