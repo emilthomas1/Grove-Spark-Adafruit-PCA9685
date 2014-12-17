@@ -29,8 +29,8 @@
  * use the default as specified in the header file (0x40)
  */
 Adafruit_PCA9685::Adafruit_PCA9685(uint8_t addr, bool debug) {
-  _i2caddr = addr;
-  _debug = debug;
+  i2caddr = addr;
+  debugging = debug;
 }
 
 /**
@@ -53,7 +53,7 @@ void Adafruit_PCA9685::reset(void) {
  * @param freq  The frequency
  */
 void Adafruit_PCA9685::setPWMFreq(float freq) {
-  if ( _debug ) {
+  if ( debugging ) {
     Serial.print("Attempting to set freq "); Serial.println(freq);
   }
   freq *= 0.9;  // Correct for overshoot in the frequency setting (see issue #11).
@@ -61,11 +61,11 @@ void Adafruit_PCA9685::setPWMFreq(float freq) {
   prescaleval /= 4096;
   prescaleval /= freq;
   prescaleval -= 1;
-  if ( _debug ) {
+  if ( debugging ) {
     Serial.print("Estimated pre-scale: "); Serial.println(prescaleval);
   }
   uint8_t prescale = floor(prescaleval + 0.5);
-  if ( _debug ) {
+  if ( debugging ) {
     Serial.print("Final pre-scale: "); Serial.println(prescale);
   }
   
@@ -150,12 +150,12 @@ uint16_t Adafruit_PCA9685::readPWMOn(uint8_t ledNum) {
  * @param off     12-bit PWM-off value
  */
 void Adafruit_PCA9685::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
-  if (_debug) {
+  if ( debugging ) {
    Serial.print("Setting PWM for LED "); Serial.print(ledNum); Serial.print(" to ");
    Serial.print(on); Serial.print(" -> "); Serial.println(off);
   }
 
-  Wire.beginTransmission(_i2caddr);
+  Wire.beginTransmission(i2caddr);
   Wire.write(PCA9685_LED0_ON_L + 4*ledNum);  // Offset the address of the LED
   Wire.write(on);                    // Write the first byte for On
   Wire.write(on >> 8);               // Write the second byte
@@ -164,16 +164,20 @@ void Adafruit_PCA9685::setPWM(uint8_t ledNum, uint16_t on, uint16_t off) {
   Wire.endTransmission();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Private Methods
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * Read a byte from a given address on the driver
  * @param  addr  The address
  * @return       The value at the given address
  */
 uint8_t Adafruit_PCA9685::read8(uint8_t addr) {
-  Wire.beginTransmission(_i2caddr);
+  Wire.beginTransmission(i2caddr);
   Wire.write(addr);
   Wire.endTransmission();
-  Wire.requestFrom((uint8_t)_i2caddr, (uint8_t)1);
+  Wire.requestFrom(i2caddr, 1);
   return Wire.read();
 }
 
@@ -183,7 +187,7 @@ uint8_t Adafruit_PCA9685::read8(uint8_t addr) {
  * @param val   The byte to be written
  */
 void Adafruit_PCA9685::write8(uint8_t addr, uint8_t val) {
-  Wire.beginTransmission(_i2caddr);
+  Wire.beginTransmission(i2caddr);
   Wire.write(addr);
   Wire.write(val);
   Wire.endTransmission();

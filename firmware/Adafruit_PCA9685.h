@@ -53,11 +53,11 @@ class Adafruit_PCA9685 {
   uint16_t readPWMOn(uint8_t ledNum);
 
  private:
-  uint8_t _i2caddr;
-  bool _debug;
+  uint8_t i2caddr;
+  bool debugging;
 
   uint8_t read8(uint8_t addr);
-  void write8(uint8_t addr, uint8_t d);
+  void write8(uint8_t addr, uint8_t val);
 };
 
 #endif
